@@ -5,84 +5,84 @@
       "parameters": {
         "documentId": {
           "mode": "id",
-          "value": "YOUR_INPUT_SPREADSHEET_ID"
+          "value": "<YOUR_INPUT_SPREADSHEET_ID>"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "s1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_INPUT_SPREADSHEET_ID/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<YOUR_INPUT_SPREADSHEET_ID>/edit#gid=0"
         },
         "options": {}
       },
-      "id": "d05c4377-5e0b-41bd-9dbd-2c42af7f0aca",
-      "name": "Read Input Sheet",
+      "id": "d818ba5d-09cc-4f8f-bf8e-3de3a8f698dd",
+      "name": "Read Input Sheet1",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
       "position": [
-        24144,
-        8416
+        38880,
+        17440
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "KPzGgJdhqfoGcX8G",
+          "id": "<YOUR_GOOGLE_SHEETS_CREDENTIAL_ID>",
           "name": "Google Sheets account"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "const webhookData = $('Webhook').first().json;\n\nconst targetRow = String(webhookData.body?.targetRow || webhookData.query?.targetRow || '');\n\nif (!targetRow) {\n  return $input.all();\n}\n\nconst filtered = [];\n\nfor (const item of $input.all()) {\n\n  const row =\n    item.json.row_number ||\n    item.json.rowNumber ||\n    item.json.row ||\n    item.json.id ||\n    '';\n\n  if (String(row) === targetRow) {\n    filtered.push(item);\n  }\n}\n\nreturn filtered;"
+        "jsCode": "const webhookData = $('Webhook1').first().json;\n\nconst targetRow = String(webhookData.body?.targetRow || webhookData.query?.targetRow || '');\n\nif (!targetRow) {\n  return $input.all();\n}\n\nconst filtered = [];\n\nfor (const item of $input.all()) {\n\n  const row =\n    item.json.row_number ||\n    item.json.rowNumber ||\n    item.json.row ||\n    item.json.id ||\n    '';\n\n  if (String(row) === targetRow) {\n    filtered.push(item);\n  }\n}\n\nreturn filtered;"
       },
-      "id": "9f300a27-c9e4-4d31-a526-1768f9a6bff5",
-      "name": "Filter by Row",
+      "id": "c6d73715-744b-44f1-8322-5785c0029eb6",
+      "name": "Filter by Row1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        24320,
-        8416
+        39056,
+        17440
       ]
     },
     {
       "parameters": {
         "jsCode": "for (const item of $input.all()) {\n  let url = item.json.company_url || '';\n  item.json.clean_domain = url.replace(/^(?:https?:\\/\\/)?(?:www\\.)?/i, '').split('/')[0];\n}\nreturn $input.all();"
       },
-      "id": "3f0062a2-638d-4caa-af42-8cac42662595",
-      "name": "Clean URL",
+      "id": "b9351ab5-1c4f-4289-9b67-92b09117be79",
+      "name": "Clean URL1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        24480,
-        8416
+        39216,
+        17440
       ]
     },
     {
       "parameters": {
         "documentId": {
           "mode": "id",
-          "value": "YOUR_OUTPUT_SPREADSHEET_ID"
+          "value": "<YOUR_OUTPUT_SPREADSHEET_ID>"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "s2",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_OUTPUT_SPREADSHEET_ID/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<YOUR_OUTPUT_SPREADSHEET_ID>/edit#gid=0"
         },
         "options": {}
       },
-      "id": "fbe7677a-39bf-48fa-940f-b09dc57df2fb",
-      "name": "Read Output Sheet",
+      "id": "fe808612-7616-480e-b85c-c9aeb5a0fef1",
+      "name": "Read Output Sheet1",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
       "position": [
-        24144,
-        8624
+        38880,
+        17648
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "KPzGgJdhqfoGcX8G",
+          "id": "<YOUR_GOOGLE_SHEETS_CREDENTIAL_ID>",
           "name": "Google Sheets account"
         }
       }
@@ -100,22 +100,23 @@
             },
             {
               "name": "X-Api-Key",
-              "value": "YOUR_APOLLO_API_KEY"
-            }
+              "value": "<YOUR_APOLLO_API_KEY>"
+            },
+            {}
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"q_organization_name\": \"{{ $('Clean URL').item.json.company_name }}\",\n  \"organization_domains\": [\"{{ $('Clean URL').item.json.clean_domain }}\"]\n}",
+        "jsonBody": "={\n  \"q_organization_name\": \"{{ $('Clean URL1').item.json.company_name }}\",\n  \"organization_domains\": [\"{{ $('Clean URL1').item.json.clean_domain }}\"]\n}",
         "options": {}
       },
-      "id": "03eeca8a-c709-4373-8b40-eff2f061e082",
-      "name": "Apollo Organization Search",
+      "id": "90ef27d9-0bb4-478d-b2b3-8eaac5744e71",
+      "name": "Apollo Organization Search1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        24640,
-        8416
+        39376,
+        17440
       ]
     },
     {
@@ -131,22 +132,22 @@
             },
             {
               "name": "X-Api-Key",
-              "value": "YOUR_APOLLO_API_KEY"
+              "value": "<YOUR_APOLLO_API_KEY>"
             }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"q_organization_domains\": \"{{ $('Clean URL').item.json.clean_domain }}\",\n  \"person_titles\": [\"Founder\", \"CEO\", \"CTO\", \"Engineering Manager\", \"VP Engineering\"],\n  \"page\": 1,\n  \"per_page\": 15\n}",
+        "jsonBody": "={\n  \"q_organization_domains\": \"{{ $('Clean URL1').item.json.clean_domain }}\",\n  \"person_titles\": [\"Founder\", \"CEO\", \"CTO\", \"Engineering Manager\", \"VP Engineering\"],\n  \"page\": 1,\n  \"per_page\": 15\n}",
         "options": {}
       },
-      "id": "70f3149c-0a92-438f-9e8b-146ce50a1767",
-      "name": "Apollo API Search High Value",
+      "id": "c2d0f438-77ef-4c23-b2bd-e2b9cfa834e1",
+      "name": "Apollo API Search High Value1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        24832,
-        8416
+        39568,
+        17440
       ]
     },
     {
@@ -160,13 +161,13 @@
           ]
         }
       },
-      "id": "a4372a08-4306-437c-8f07-c60908b8de2c",
-      "name": "If Zero Results",
+      "id": "0ae73ab7-c4d3-4d5d-92fe-db954ab79042",
+      "name": "If Zero Results1",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        25040,
-        8416
+        39776,
+        17440
       ]
     },
     {
@@ -182,46 +183,46 @@
             },
             {
               "name": "X-Api-Key",
-              "value": "YOUR_APOLLO_API_KEY"
+              "value": "<YOUR_APOLLO_API_KEY>"
             }
           ]
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"q_organization_domains\": \"{{ $('Clean URL').item.json.clean_domain }}\",\n  \"page\": 1,\n  \"per_page\": 15\n}",
+        "jsonBody": "={\n  \"q_organization_domains\": \"{{ $('Clean URL1').item.json.clean_domain }}\",\n  \"page\": 1,\n  \"per_page\": 15\n}",
         "options": {}
       },
-      "id": "da04e180-e9aa-4fc8-81a2-d078446bc79e",
-      "name": "Apollo API Search Fallback",
+      "id": "dcb59d09-d762-497c-8d2c-7bcd53244d90",
+      "name": "Apollo API Search Fallback1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        25088,
-        8624
+        39824,
+        17648
       ]
     },
     {
       "parameters": {},
-      "id": "10ba0fe8-bfec-49a8-9326-68842657b4af",
-      "name": "Merge Search Results",
+      "id": "d75f8786-cd1d-4c7d-8bb1-afed250c9540",
+      "name": "Merge Search Results1",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 2,
       "position": [
-        25232,
-        8416
+        39968,
+        17440
       ]
     },
     {
       "parameters": {
-        "jsCode": "let results = [];\nlet items = $input.all();\nfor (let i = 0; i < items.length; i++) {\n  const people = items[i].json.people || [];\n  const targetTitles = [\"Founder\", \"CEO\", \"CTO\", \"Engineering Manager\", \"VP Engineering\"];\n  let selected = [];\n  let usedTitles = new Set();\n  let usedIds = new Set();\n\n  for (let target of targetTitles) {\n    let person = people.find(p => p.title && p.title.toLowerCase().includes(target.toLowerCase()) && !usedIds.has(p.id));\n    if (person) {\n      selected.push(person);\n      usedTitles.add(person.title);\n      usedIds.add(person.id);\n    }\n  }\n  if (selected.length < 5) {\n    for (let person of people) {\n      if (!usedIds.has(person.id) && person.title && !usedTitles.has(person.title)) {\n        selected.push(person);\n        usedTitles.add(person.title);\n        usedIds.add(person.id);\n        if (selected.length >= 5) break;\n      }\n    }\n  }\n  if (selected.length < 5) {\n    for (let person of people) {\n      if (!usedIds.has(person.id)) {\n        selected.push(person);\n        usedIds.add(person.id);\n        if (selected.length >= 5) break;\n      }\n    }\n  }\n  selected.forEach(p => {\n    results.push({ json: p, pairedItem: { item: i } });\n  });\n}\nreturn results;"
+        "jsCode": "let results = [];\nlet items = $input.all();\nfor (let i = 0; i < items.length; i++) {\n  const people = items[i].json.people || [];\n  const targetTitles = [\"Founder\", \"CEO\", \"CTO\", \"Engineering Manager\", \"VP Engineering\"];\n  let selected = [];\n  let usedTitles = new Set();\n  let usedIds = new Set();\n\n  for (let target of targetTitles) {\n    let person = people.find(p => p.title && p.title.toLowerCase().includes(target.toLowerCase()) && !usedIds.has(p.id));\n    if (person) {\n      selected.push(person);\n      usedTitles.add(person.title);\n      usedIds.add(person.id);\n    }\n  }\n  if (selected.length < 5) {\n    for (let person of people) {\n      if (!usedIds.has(person.id) && person.title && !usedTitles.has(person.title)) {\n        selected.push(person);\n        usedTitles.add(person.title);\n        usedIds.add(person.id);\n        if (selected.length >= 5) break;\n      }\n    }\n  }\n  if (selected.length < 5) {\n    for (let person of people) {\n      if (!usedIds.has(person.id)) {\n        selected.push(person);\n        usedIds.add(person.id);\n        if (selected.length >= 5) break;\n      }\n    }\n  }\n  selected.forEach((p, idx) => {\n    p.is_last_item = (idx === selected.length - 1);\n    results.push({ json: p, pairedItem: { item: i } });\n  });\n}\nreturn results;"
       },
-      "id": "80a7d6d0-35c4-42ee-ae22-536044c87bff",
-      "name": "Filter Unique Titles",
+      "id": "1a39a32a-8f69-4255-8880-e308f7085e47",
+      "name": "Filter Unique Titles1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        25440,
-        8416
+        40176,
+        17440
       ]
     },
     {
@@ -229,46 +230,26 @@
         "batchSize": 1,
         "options": {}
       },
-      "id": "348d1e41-62b5-464f-92bd-d6e9467571a6",
-      "name": "Split In Batches",
+      "id": "8f820380-df3f-4384-9d0e-c28ed9899d1a",
+      "name": "Split In Batches1",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 1,
       "position": [
-        25632,
-        8416
+        40368,
+        17440
       ]
     },
     {
       "parameters": {
-        "jsCode": "const person = $input.item.json;\nconst cleanDomain = $('Clean URL').item.json.clean_domain || '';\nconst staticData = $getWorkflowStaticData('node');\nstaticData.skippedDomains = staticData.skippedDomains || [];\n\nlet existingLeads = [];\ntry { existingLeads = $('Read Output Sheet').all().map(item => item.json); } catch(e) {}\n\nlet skip = false;\n\ntry {\n  const successes = $('Update Google Sheet').all();\n  if (successes.some(s => (s.json.company_url || '').includes(cleanDomain) || (s.json.clean_domain || '').includes(cleanDomain))) {\n    skip = true;\n  }\n} catch(e) {}\n\nif (staticData.skippedDomains.includes(cleanDomain)) { skip = true; }\n\nif (skip) {\n   return { json: { ...person, duplicate: true, skip_silently: true } };\n}\n\nlet exists = false;\nfor (let lead of existingLeads) {\n  if (lead.apollo_person_id && lead.apollo_person_id === person.id) { exists = true; break; }\n  if (lead.linkedin_url && person.linkedin_url && lead.linkedin_url === person.linkedin_url) { exists = true; break; }\n  if (lead.verified_email && person.email && lead.verified_email === person.email) { exists = true; break; }\n  if (lead.first_name && lead.first_name === person.first_name && lead.last_name === person.last_name && (lead.company_url || lead.clean_domain || '').includes(cleanDomain)) { exists = true; break; }\n}\n\nif (exists) { staticData.skippedDomains.push(cleanDomain); }\nreturn { json: { ...person, duplicate: exists, skip_silently: false } };"
+        "jsCode": "const person = $input.item.json;\nconst cleanDomain = $('Clean URL1').item.json.clean_domain || '';\n\nconst staticData = $getWorkflowStaticData('node');\nconst now = new Date().getTime();\nif (!staticData.lastUpdate || (now - staticData.lastUpdate > 30000)) {\n    staticData.skippedDomains = [];\n}\nstaticData.lastUpdate = now;\n\nlet existingLeads = [];\ntry { existingLeads = $('Read Output Sheet1').all().map(item => item.json); } catch(e) {}\n\nlet skip = false;\n\ntry {\n  const successes = $('Update Google Sheet1').all();\n  if (successes.some(s => (s.json.company_url || '').includes(cleanDomain) || (s.json.clean_domain || '').includes(cleanDomain))) {\n    skip = true;\n  }\n} catch(e) {}\n\nif (staticData.skippedDomains.includes(cleanDomain)) { skip = true; }\n\nif (skip) {\n   return { json: { ...person, duplicate: true, skip_silently: true } };\n}\n\nlet exists = false;\nfor (let lead of existingLeads) {\n  if (lead.apollo_person_id && lead.apollo_person_id === person.id) { exists = true; break; }\n  if (lead.linkedin_url && person.linkedin_url && lead.linkedin_url === person.linkedin_url) { exists = true; break; }\n  if (lead.verified_email && person.email && lead.verified_email === person.email) { exists = true; break; }\n  if (lead.first_name && lead.first_name === person.first_name && lead.last_name === person.last_name && (lead.company_url || lead.clean_domain || '').includes(cleanDomain)) { exists = true; break; }\n}\n\nif (exists) { staticData.skippedDomains.push(cleanDomain); }\nreturn { json: { ...person, duplicate: exists, skip_silently: false } };"
       },
-      "id": "213f246a-db39-4649-9106-6195c39aad97",
-      "name": "Deduplication Check",
+      "id": "51f2c4c9-327e-45f2-8387-a41cfe361860",
+      "name": "Deduplication Check1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        25840,
-        8416
-      ]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "boolean": [
-            {
-              "value1": "={{$json.skip_silently}}",
-              "value2": true
-            }
-          ]
-        }
-      },
-      "id": "8af915f9-39d7-4f73-aa41-12fe7f4fc5eb",
-      "name": "If Skip Silently",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 1,
-      "position": [
-        25984,
-        8416
+        40576,
+        17440
       ]
     },
     {
@@ -282,19 +263,19 @@
           ]
         }
       },
-      "id": "a2324ba0-9a49-42b2-865a-803e9f3c010c",
-      "name": "If Duplicate",
+      "id": "84b49801-787d-42af-95f0-f42b6ab13215",
+      "name": "If Duplicate1",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        26176,
-        8432
+        40912,
+        17456
       ]
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "YOUR_SLACK_WEBHOOK_URL",
+        "url": "<YOUR_SLACK_WEBHOOK_URL>",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -306,16 +287,16 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"text\": \"🔄 *Candidate Already Exists!*\\n\\n*Name:* {{$json.first_name}} {{$json.last_name}}\\n*Title:* {{$json.title}}\\n*Email:* {{$json.email || 'N/A'}}\\n*LinkedIn:* {{$json.linkedin_url || 'N/A'}}\\n*Company:* {{ $('Clean URL').item.json.company_name }}\\n\\nSkipping this employee and all other fallbacks for this company.\"\n}",
+        "jsonBody": "={\n  \"text\": \"🔄 *Candidate Already Exists!*\\n\\n*Name:* {{$json.first_name}} {{$json.last_name}}\\n*Title:* {{$json.title}}\\n*Email:* {{$json.email || 'N/A'}}\\n*LinkedIn:* {{$json.linkedin_url || 'N/A'}}\\n*Company:* {{ $('Clean URL1').item.json.company_name }}\\n\\nSkipping this employee and all other fallbacks for this company.\"\n}",
         "options": {}
       },
-      "id": "ccb9df90-5abf-401c-938f-f827facbdb55",
-      "name": "Slack Notification (Duplicate)",
+      "id": "a55c10ed-4c4c-4a8e-ab42-69e2eff7ed7e",
+      "name": "Slack Notification (Duplicate)1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        26400,
-        8192
+        41136,
+        17216
       ]
     },
     {
@@ -331,7 +312,7 @@
             },
             {
               "name": "X-Api-Key",
-              "value": "YOUR_APOLLO_API_KEY"
+              "value": "<YOUR_APOLLO_API_KEY>"
             }
           ]
         },
@@ -340,26 +321,26 @@
         "jsonBody": "={\n  \"id\": \"{{$json.id}}\"\n}",
         "options": {}
       },
-      "id": "23debe8c-404e-4161-bb3e-601247c4b720",
-      "name": "Apollo Single Enrich",
+      "id": "d7465978-1eed-4a2a-8383-0c2d4bc7ff97",
+      "name": "Apollo Single Enrich1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        26256,
-        8640
+        40992,
+        17664
       ]
     },
     {
       "parameters": {
-        "jsCode": "const matchResponse = $json.matches || [];\nlet match = $json.person || (matchResponse.length > 0 ? matchResponse[0] : {});\n\nlet org = {};\ntry {\n  const orgItem = $('Apollo Organization Search').item;\n  if (orgItem && orgItem.json && orgItem.json.organizations && orgItem.json.organizations.length > 0) {\n    org = orgItem.json.organizations[0];\n  }\n} catch (e) {\n  // fallback if item pairing fails\n}\n\nconst company = {\n  company_name: org?.name || $('Clean URL').item?.json?.company_name || '',\n  company_url: org?.website_url || $('Clean URL').item?.json?.company_url || '',\n  employee_count: org?.estimated_num_employees || '',\n  industry: org?.industry || '',\n};\n\nconst today = new Date().toISOString().split('T')[0];\nconst email = match.email || (match.person ? match.person.email : '') || '';\nconst linkedin = match.linkedin_url || (match.person ? match.person.linkedin_url : '') || '';\n\nconst is_email_missing = !email;\nconst is_linkedin_missing = !linkedin;\nconst has_missing_data = is_email_missing || is_linkedin_missing;\n\nreturn {\n  json: {\n    company_name: company.company_name,\n    company_url: company.company_url,\n    employee_count: company.employee_count,\n    industry: company.industry,\n    first_name: match.first_name || '',\n    last_name: match.last_name || '',\n    designation: match.title || '',\n    partial_email: email,\n    verified_email: email,\n    linkedin_url: linkedin,\n    apollo_person_id: match.id || '',\n    enrichment_status: 'verified',\n    enriched_at: today,\n    has_missing_data: has_missing_data,\n    is_email_missing: is_email_missing,\n    is_linkedin_missing: is_linkedin_missing,\n    is_last_item: $node[\"Split In Batches\"].context.noItemsLeft\n  }\n};"
+        "jsCode": "const matchResponse = $json.matches || [];\nlet match = $json.person || (matchResponse.length > 0 ? matchResponse[0] : {});\n\nlet org = {};\ntry {\n  const orgItem = $('Apollo Organization Search1').item;\n  if (orgItem && orgItem.json && orgItem.json.organizations && orgItem.json.organizations.length > 0) {\n    org = orgItem.json.organizations[0];\n  }\n} catch (e) {\n  // fallback if item pairing fails\n}\n\nconst company = {\n  company_name: org?.name || $('Clean URL1').item?.json?.company_name || '',\n  company_url: org?.website_url || $('Clean URL1').item?.json?.company_url || '',\n  employee_count: org?.estimated_num_employees || '',\n  industry: org?.industry || '',\n};\n\nconst today = new Date().toISOString().split('T')[0];\nconst email = match.email || (match.person ? match.person.email : '') || '';\nconst linkedin = match.linkedin_url || (match.person ? match.person.linkedin_url : '') || '';\n\nconst is_email_missing = !email;\nconst is_linkedin_missing = !linkedin;\nconst has_missing_data = is_email_missing || is_linkedin_missing;\n\nreturn {\n  json: {\n    company_name: company.company_name,\n    company_url: company.company_url,\n    employee_count: company.employee_count,\n    industry: company.industry,\n    first_name: match.first_name || '',\n    last_name: match.last_name || '',\n    designation: match.title || '',\n    partial_email: email,\n    verified_email: email,\n    linkedin_url: linkedin,\n    apollo_person_id: match.id || '',\n    enrichment_status: 'verified',\n    enriched_at: today,\n    has_missing_data: has_missing_data,\n    is_email_missing: is_email_missing,\n    is_linkedin_missing: is_linkedin_missing,\n    is_last_item: $node[\"Split In Batches1\"].context.noItemsLeft\n  }\n};"
       },
-      "id": "64093aa8-bb2a-453f-bf55-3ec2a5ed7d0e",
-      "name": "Normalize Single Data",
+      "id": "601e4f23-979b-4984-8080-fb765eda2d3a",
+      "name": "Normalize Single Data1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        26432,
-        8560
+        41168,
+        17584
       ]
     },
     {
@@ -373,13 +354,13 @@
           ]
         }
       },
-      "id": "19560b07-f79a-4e3a-abaf-57dff365937e",
-      "name": "If Missing Data",
+      "id": "6807a323-4232-4078-8c58-e4350e82d6d6",
+      "name": "If Missing Data1",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        26640,
-        8560
+        41376,
+        17584
       ]
     },
     {
@@ -393,13 +374,13 @@
           ]
         }
       },
-      "id": "cb6b75c4-9f92-4dc8-a035-788210756228",
-      "name": "If Needs MailMeteor",
+      "id": "3adbbc7c-e9c1-497f-a326-77051b6ba137",
+      "name": "If Needs MailMeteor1",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        26832,
-        8416
+        41568,
+        17440
       ],
       "notes": "We only call MailMeteor if Email is missing. If LinkedIn is missing, we skip them anyway so no point calling it."
     },
@@ -418,29 +399,29 @@
         },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={\n  \"first_name\": \"{{ $('Normalize Single Data').item.json.first_name }}\",\n  \"last_name\": \"{{ $('Normalize Single Data').item.json.last_name }}\",\n  \"domain\": \"{{ $('Clean URL').item.json.clean_domain }}\",\n  \"linkedin_url\": \"{{ $('Normalize Single Data').item.json.linkedin_url }}\"\n}",
+        "jsonBody": "={\n  \"first_name\": \"{{ $('Normalize Single Data1').item.json.first_name }}\",\n  \"last_name\": \"{{ $('Normalize Single Data1').item.json.last_name }}\",\n  \"domain\": \"{{ $('Clean URL1').item.json.clean_domain }}\",\n  \"linkedin_url\": \"{{ $('Normalize Single Data1').item.json.linkedin_url }}\"\n}",
         "options": {}
       },
-      "id": "59b86847-ac5e-4dbc-805a-d9a8213835c3",
-      "name": "MailMeteor API",
+      "id": "ded2fd5d-0b02-4a42-b12d-6f89d5309c4f",
+      "name": "MailMeteor API1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        27040,
-        8272
+        41776,
+        17296
       ]
     },
     {
       "parameters": {
-        "jsCode": "const mmResponse = $input.item.json;\nconst personData = $('Normalize Single Data').item.json;\n\nlet finalData = { ...personData };\n\nif (mmResponse.success && mmResponse.email) {\n  finalData.verified_email = mmResponse.email;\n  finalData.enrichment_status = 'verified_via_' + mmResponse.source;\n  // Re-evaluate missing data now that we have an email.\n  // If linkedin was also missing, this will STILL be true, which is correct.\n  finalData.has_missing_data = (!finalData.verified_email || !finalData.linkedin_url);\n}\n\nreturn { json: finalData };"
+        "jsCode": "const mmResponse = $input.item.json;\nconst personData = $('Normalize Single Data1').item.json;\n\nlet finalData = { ...personData };\n\nif (mmResponse.success && mmResponse.email) {\n  finalData.verified_email = mmResponse.email;\n  finalData.enrichment_status = 'verified_via_' + mmResponse.source;\n  // Re-evaluate missing data now that we have an email.\n  // If linkedin was also missing, this will STILL be true, which is correct.\n  finalData.has_missing_data = (!finalData.verified_email || !finalData.linkedin_url);\n}\n\nreturn { json: finalData };"
       },
-      "id": "b80e7009-2dbf-4920-aaaa-fb4d90815b5a",
-      "name": "Normalize MailMeteor Data",
+      "id": "8e9e1304-a533-4134-9a8f-5aef57e9fc3b",
+      "name": "Normalize MailMeteor Data1",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        27232,
-        8272
+        41968,
+        17296
       ]
     },
     {
@@ -454,13 +435,13 @@
           ]
         }
       },
-      "id": "9d0b04d6-c03d-4838-a405-81d59f8b89ed",
-      "name": "If MailMeteor Missing Data",
+      "id": "cccda31c-8f85-422c-a4ae-f0fa4247735c",
+      "name": "If MailMeteor Missing Data1",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        27440,
-        8272
+        42176,
+        17296
       ]
     },
     {
@@ -474,13 +455,13 @@
           ]
         }
       },
-      "id": "402f6686-696a-4de9-aa4e-9ecea63c8fcd",
-      "name": "If Last Item",
+      "id": "423f7831-cbb6-483c-b8fb-0609147e90e9",
+      "name": "If Last Item1",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
       "position": [
-        27632,
-        8416
+        42368,
+        17440
       ]
     },
     {
@@ -488,14 +469,14 @@
         "operation": "appendOrUpdate",
         "documentId": {
           "mode": "id",
-          "value": "YOUR_OUTPUT_SPREADSHEET_ID"
+          "value": "<YOUR_OUTPUT_SPREADSHEET_ID>"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "s2",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_OUTPUT_SPREADSHEET_ID/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/<YOUR_OUTPUT_SPREADSHEET_ID>/edit#gid=0"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -642,17 +623,17 @@
         },
         "options": {}
       },
-      "id": "e7ebb558-a6eb-4ad4-9e74-bca5c0706935",
-      "name": "Update Google Sheet",
+      "id": "427277db-b03d-4234-8c07-19fbe61e3389",
+      "name": "Update Google Sheet1",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
       "position": [
-        27840,
-        8608
+        42576,
+        17632
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "KPzGgJdhqfoGcX8G",
+          "id": "<YOUR_GOOGLE_SHEETS_CREDENTIAL_ID>",
           "name": "Google Sheets account"
         }
       }
@@ -660,7 +641,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "YOUR_SLACK_WEBHOOK_URL",
+        "url": "<YOUR_SLACK_WEBHOOK_URL>",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -675,13 +656,13 @@
         "jsonBody": "={\n  \"text\": \"🚀 Single Lead Enriched ({{ $json.has_missing_data ? 'Partial Data - Last Option' : 'Complete Data' }})\\n\\nName: {{$json.first_name}} {{$json.last_name}}\\nCompany: {{$json.company_name}}\\nDesignation: {{$json.designation}}\\nEmail: {{$json.verified_email || 'Not Found'}}\\nLinkedIn: {{$json.linkedin_url || 'Not Found'}}\\nEnrichment Source: {{$json.enrichment_status}}\"\n}",
         "options": {}
       },
-      "id": "422f8e44-c490-46ce-bce3-f24f88288ec6",
-      "name": "Slack Notification (Success/Final)",
+      "id": "4e4311fd-89cf-48e7-b87e-ff00289b0c5a",
+      "name": "Slack Notification (Success/Final)1",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4,
       "position": [
-        28032,
-        8608
+        42768,
+        17632
       ]
     },
     {
@@ -710,339 +691,359 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        23968,
-        8416
+        38704,
+        17440
       ],
-      "id": "a8ba6fb2-2725-478e-9a93-1469b8491b98",
-      "name": "Webhook",
+      "id": "ea5ace14-ae33-481c-a81c-ccacf028e1c0",
+      "name": "Webhook1",
       "webhookId": "e72380a1-a732-4323-8796-0ef57b8bb512"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.skip_silently}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "76b3851f-d316-4813-b24b-551f4581e9bc",
+      "name": "If Skip Silently1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        40784,
+        17440
+      ]
     }
   ],
   "pinData": {},
   "connections": {
-    "Webhook": {
+    "Read Input Sheet1": {
       "main": [
         [
           {
-            "node": "Read Input Sheet",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Read Output Sheet",
+            "node": "Filter by Row1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Read Input Sheet": {
+    "Filter by Row1": {
       "main": [
         [
           {
-            "node": "Filter by Row",
+            "node": "Clean URL1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Filter by Row": {
+    "Clean URL1": {
       "main": [
         [
           {
-            "node": "Clean URL",
+            "node": "Apollo Organization Search1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Clean URL": {
+    "Apollo Organization Search1": {
       "main": [
         [
           {
-            "node": "Apollo Organization Search",
+            "node": "Apollo API Search High Value1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Apollo Organization Search": {
+    "Apollo API Search High Value1": {
       "main": [
         [
           {
-            "node": "Apollo API Search High Value",
+            "node": "If Zero Results1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Apollo API Search High Value": {
+    "If Zero Results1": {
       "main": [
         [
           {
-            "node": "If Zero Results",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "If Zero Results": {
-      "main": [
-        [
-          {
-            "node": "Merge Search Results",
+            "node": "Merge Search Results1",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Apollo API Search Fallback",
+            "node": "Apollo API Search Fallback1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Apollo API Search Fallback": {
+    "Apollo API Search Fallback1": {
       "main": [
         [
           {
-            "node": "Merge Search Results",
+            "node": "Merge Search Results1",
             "type": "main",
             "index": 1
           }
         ]
       ]
     },
-    "Merge Search Results": {
+    "Merge Search Results1": {
       "main": [
         [
           {
-            "node": "Filter Unique Titles",
+            "node": "Filter Unique Titles1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Filter Unique Titles": {
+    "Filter Unique Titles1": {
       "main": [
         [
           {
-            "node": "Split In Batches",
+            "node": "Split In Batches1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Split In Batches": {
+    "Split In Batches1": {
       "main": [
         [
           {
-            "node": "Deduplication Check",
+            "node": "Deduplication Check1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Deduplication Check": {
+    "Deduplication Check1": {
       "main": [
         [
           {
-            "node": "If Skip Silently",
+            "node": "If Skip Silently1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "If Skip Silently": {
+    "If Duplicate1": {
       "main": [
         [
           {
-            "node": "Split In Batches",
+            "node": "Slack Notification (Duplicate)1",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "If Duplicate",
+            "node": "Apollo Single Enrich1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "If Duplicate": {
+    "Slack Notification (Duplicate)1": {
       "main": [
         [
           {
-            "node": "Slack Notification (Duplicate)",
+            "node": "Split In Batches1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo Single Enrich1": {
+      "main": [
+        [
+          {
+            "node": "Normalize Single Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Single Data1": {
+      "main": [
+        [
+          {
+            "node": "If Missing Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Missing Data1": {
+      "main": [
+        [
+          {
+            "node": "If Needs MailMeteor1",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Apollo Single Enrich",
+            "node": "Update Google Sheet1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Apollo Single Enrich": {
+    "If Needs MailMeteor1": {
       "main": [
         [
           {
-            "node": "Normalize Single Data",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Normalize Single Data": {
-      "main": [
-        [
-          {
-            "node": "If Missing Data",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "If Missing Data": {
-      "main": [
-        [
-          {
-            "node": "If Needs MailMeteor",
+            "node": "MailMeteor API1",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Update Google Sheet",
+            "node": "If Last Item1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "If Needs MailMeteor": {
+    "MailMeteor API1": {
       "main": [
         [
           {
-            "node": "MailMeteor API",
+            "node": "Normalize MailMeteor Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize MailMeteor Data1": {
+      "main": [
+        [
+          {
+            "node": "If MailMeteor Missing Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If MailMeteor Missing Data1": {
+      "main": [
+        [
+          {
+            "node": "If Last Item1",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "If Last Item",
+            "node": "Update Google Sheet1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "MailMeteor API": {
+    "If Last Item1": {
       "main": [
         [
           {
-            "node": "Normalize MailMeteor Data",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Normalize MailMeteor Data": {
-      "main": [
-        [
-          {
-            "node": "If MailMeteor Missing Data",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "If MailMeteor Missing Data": {
-      "main": [
-        [
-          {
-            "node": "If Last Item",
+            "node": "Update Google Sheet1",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Update Google Sheet",
+            "node": "Split In Batches1",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "If Last Item": {
+    "Update Google Sheet1": {
       "main": [
         [
           {
-            "node": "Update Google Sheet",
+            "node": "Slack Notification (Success/Final)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Notification (Success/Final)1": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "Read Input Sheet1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Output Sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Skip Silently1": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches1",
             "type": "main",
             "index": 0
           }
         ],
         [
           {
-            "node": "Split In Batches",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Update Google Sheet": {
-      "main": [
-        [
-          {
-            "node": "Slack Notification (Success/Final)",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Slack Notification (Success/Final)": {
-      "main": [
-        [
-          {
-            "node": "Split In Batches",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Slack Notification (Duplicate)": {
-      "main": [
-        [
-          {
-            "node": "Split In Batches",
+            "node": "If Duplicate1",
             "type": "main",
             "index": 0
           }
@@ -1056,10 +1057,9 @@
     "binaryMode": "separate",
     "availableInMCP": false,
     "timeSavedMode": "fixed",
-    "callerPolicy": "workflowsFromSameOwner",
-    "executionTimeout": -1
+    "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "bf7633ed-cd26-4cb5-8836-d68cb93d320e",
+  "versionId": "f9982da2-d748-4924-8f1c-08e716b496ee",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "581cc386adb3c63a358ac6654f7a77eae3572a40126b3df731395ba6e42d841c"
