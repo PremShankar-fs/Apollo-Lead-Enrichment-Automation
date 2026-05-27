@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Apollo Enrichment</title>
+</head>
+
+<body>
+
+  <button onclick="runAllRows()">
+    Run Full Enrichment
+  </button>
+
+  <br><br>
+
+  <input type="number" id="rowInput" placeholder="Enter Row Number" />
+
+  <button onclick="runSpecificRow()">
+    Run Specific Row
+  </button>
+
+  <script>
+
+    const WEBHOOK_URL =
+      "https://premshankar26.app.n8n.cloud/webhook/start-enrichment";
+
+    async function runAllRows() {
+
+      const response = await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({})
+      });
+
+      const data = await response.text();
+
+      alert("Workflow Started");
+      console.log(data);
+    }
+
+    async function runSpecificRow() {
+
+      const row = document.getElementById("rowInput").value;
+
+      const response = await fetch(WEBHOOK_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                targetRow: row
+            })
+        });
+
+      const data = await response.text();
+
+      alert("Workflow Started For Row " + row);
+      console.log(data);
+    }
+
+  </script>
+
+</body>
+</html>

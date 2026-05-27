@@ -1,0 +1,1069 @@
+{
+  "name": "Apollo Lead Enrichment v9 (with MailMeteor Fallback) copy",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "mode": "id",
+          "value": "YOUR_INPUT_SPREADSHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "s1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_INPUT_SPREADSHEET_ID/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "d05c4377-5e0b-41bd-9dbd-2c42af7f0aca",
+      "name": "Read Input Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        24144,
+        8416
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KPzGgJdhqfoGcX8G",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const webhookData = $('Webhook').first().json;\n\nconst targetRow = String(webhookData.body?.targetRow || webhookData.query?.targetRow || '');\n\nif (!targetRow) {\n  return $input.all();\n}\n\nconst filtered = [];\n\nfor (const item of $input.all()) {\n\n  const row =\n    item.json.row_number ||\n    item.json.rowNumber ||\n    item.json.row ||\n    item.json.id ||\n    '';\n\n  if (String(row) === targetRow) {\n    filtered.push(item);\n  }\n}\n\nreturn filtered;"
+      },
+      "id": "9f300a27-c9e4-4d31-a526-1768f9a6bff5",
+      "name": "Filter by Row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        24320,
+        8416
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "for (const item of $input.all()) {\n  let url = item.json.company_url || '';\n  item.json.clean_domain = url.replace(/^(?:https?:\\/\\/)?(?:www\\.)?/i, '').split('/')[0];\n}\nreturn $input.all();"
+      },
+      "id": "3f0062a2-638d-4caa-af42-8cac42662595",
+      "name": "Clean URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        24480,
+        8416
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "mode": "id",
+          "value": "YOUR_OUTPUT_SPREADSHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "s2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_OUTPUT_SPREADSHEET_ID/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "fbe7677a-39bf-48fa-940f-b09dc57df2fb",
+      "name": "Read Output Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        24144,
+        8624
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KPzGgJdhqfoGcX8G",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/organizations/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Api-Key",
+              "value": "YOUR_APOLLO_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"q_organization_name\": \"{{ $('Clean URL').item.json.company_name }}\",\n  \"organization_domains\": [\"{{ $('Clean URL').item.json.clean_domain }}\"]\n}",
+        "options": {}
+      },
+      "id": "03eeca8a-c709-4373-8b40-eff2f061e082",
+      "name": "Apollo Organization Search",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        24640,
+        8416
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/mixed_people/api_search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Api-Key",
+              "value": "YOUR_APOLLO_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"q_organization_domains\": \"{{ $('Clean URL').item.json.clean_domain }}\",\n  \"person_titles\": [\"Founder\", \"CEO\", \"CTO\", \"Engineering Manager\", \"VP Engineering\"],\n  \"page\": 1,\n  \"per_page\": 15\n}",
+        "options": {}
+      },
+      "id": "70f3149c-0a92-438f-9e8b-146ce50a1767",
+      "name": "Apollo API Search High Value",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        24832,
+        8416
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json.pagination?.total_entries || $json.total_entries || 0}}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "id": "a4372a08-4306-437c-8f07-c60908b8de2c",
+      "name": "If Zero Results",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        25040,
+        8416
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/mixed_people/api_search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Api-Key",
+              "value": "YOUR_APOLLO_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"q_organization_domains\": \"{{ $('Clean URL').item.json.clean_domain }}\",\n  \"page\": 1,\n  \"per_page\": 15\n}",
+        "options": {}
+      },
+      "id": "da04e180-e9aa-4fc8-81a2-d078446bc79e",
+      "name": "Apollo API Search Fallback",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        25088,
+        8624
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "10ba0fe8-bfec-49a8-9326-68842657b4af",
+      "name": "Merge Search Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [
+        25232,
+        8416
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "let results = [];\nlet items = $input.all();\nfor (let i = 0; i < items.length; i++) {\n  const people = items[i].json.people || [];\n  const targetTitles = [\"Founder\", \"CEO\", \"CTO\", \"Engineering Manager\", \"VP Engineering\"];\n  let selected = [];\n  let usedTitles = new Set();\n  let usedIds = new Set();\n\n  for (let target of targetTitles) {\n    let person = people.find(p => p.title && p.title.toLowerCase().includes(target.toLowerCase()) && !usedIds.has(p.id));\n    if (person) {\n      selected.push(person);\n      usedTitles.add(person.title);\n      usedIds.add(person.id);\n    }\n  }\n  if (selected.length < 5) {\n    for (let person of people) {\n      if (!usedIds.has(person.id) && person.title && !usedTitles.has(person.title)) {\n        selected.push(person);\n        usedTitles.add(person.title);\n        usedIds.add(person.id);\n        if (selected.length >= 5) break;\n      }\n    }\n  }\n  if (selected.length < 5) {\n    for (let person of people) {\n      if (!usedIds.has(person.id)) {\n        selected.push(person);\n        usedIds.add(person.id);\n        if (selected.length >= 5) break;\n      }\n    }\n  }\n  selected.forEach(p => {\n    results.push({ json: p, pairedItem: { item: i } });\n  });\n}\nreturn results;"
+      },
+      "id": "80a7d6d0-35c4-42ee-ae22-536044c87bff",
+      "name": "Filter Unique Titles",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        25440,
+        8416
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "348d1e41-62b5-464f-92bd-d6e9467571a6",
+      "name": "Split In Batches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        25632,
+        8416
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const person = $input.item.json;\nconst cleanDomain = $('Clean URL').item.json.clean_domain || '';\nconst staticData = $getWorkflowStaticData('node');\nstaticData.skippedDomains = staticData.skippedDomains || [];\n\nlet existingLeads = [];\ntry { existingLeads = $('Read Output Sheet').all().map(item => item.json); } catch(e) {}\n\nlet skip = false;\n\ntry {\n  const successes = $('Update Google Sheet').all();\n  if (successes.some(s => (s.json.company_url || '').includes(cleanDomain) || (s.json.clean_domain || '').includes(cleanDomain))) {\n    skip = true;\n  }\n} catch(e) {}\n\nif (staticData.skippedDomains.includes(cleanDomain)) { skip = true; }\n\nif (skip) {\n   return { json: { ...person, duplicate: true, skip_silently: true } };\n}\n\nlet exists = false;\nfor (let lead of existingLeads) {\n  if (lead.apollo_person_id && lead.apollo_person_id === person.id) { exists = true; break; }\n  if (lead.linkedin_url && person.linkedin_url && lead.linkedin_url === person.linkedin_url) { exists = true; break; }\n  if (lead.verified_email && person.email && lead.verified_email === person.email) { exists = true; break; }\n  if (lead.first_name && lead.first_name === person.first_name && lead.last_name === person.last_name && (lead.company_url || lead.clean_domain || '').includes(cleanDomain)) { exists = true; break; }\n}\n\nif (exists) { staticData.skippedDomains.push(cleanDomain); }\nreturn { json: { ...person, duplicate: exists, skip_silently: false } };"
+      },
+      "id": "213f246a-db39-4649-9106-6195c39aad97",
+      "name": "Deduplication Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        25840,
+        8416
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.skip_silently}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "8af915f9-39d7-4f73-aa41-12fe7f4fc5eb",
+      "name": "If Skip Silently",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        25984,
+        8416
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.duplicate}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "a2324ba0-9a49-42b2-865a-803e9f3c010c",
+      "name": "If Duplicate",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        26176,
+        8432
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_SLACK_WEBHOOK_URL",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": \"🔄 *Candidate Already Exists!*\\n\\n*Name:* {{$json.first_name}} {{$json.last_name}}\\n*Title:* {{$json.title}}\\n*Email:* {{$json.email || 'N/A'}}\\n*LinkedIn:* {{$json.linkedin_url || 'N/A'}}\\n*Company:* {{ $('Clean URL').item.json.company_name }}\\n\\nSkipping this employee and all other fallbacks for this company.\"\n}",
+        "options": {}
+      },
+      "id": "ccb9df90-5abf-401c-938f-f827facbdb55",
+      "name": "Slack Notification (Duplicate)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        26400,
+        8192
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apollo.io/api/v1/people/match",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Api-Key",
+              "value": "YOUR_APOLLO_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"id\": \"{{$json.id}}\"\n}",
+        "options": {}
+      },
+      "id": "23debe8c-404e-4161-bb3e-601247c4b720",
+      "name": "Apollo Single Enrich",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        26256,
+        8640
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const matchResponse = $json.matches || [];\nlet match = $json.person || (matchResponse.length > 0 ? matchResponse[0] : {});\n\nlet org = {};\ntry {\n  const orgItem = $('Apollo Organization Search').item;\n  if (orgItem && orgItem.json && orgItem.json.organizations && orgItem.json.organizations.length > 0) {\n    org = orgItem.json.organizations[0];\n  }\n} catch (e) {\n  // fallback if item pairing fails\n}\n\nconst company = {\n  company_name: org?.name || $('Clean URL').item?.json?.company_name || '',\n  company_url: org?.website_url || $('Clean URL').item?.json?.company_url || '',\n  employee_count: org?.estimated_num_employees || '',\n  industry: org?.industry || '',\n};\n\nconst today = new Date().toISOString().split('T')[0];\nconst email = match.email || (match.person ? match.person.email : '') || '';\nconst linkedin = match.linkedin_url || (match.person ? match.person.linkedin_url : '') || '';\n\nconst is_email_missing = !email;\nconst is_linkedin_missing = !linkedin;\nconst has_missing_data = is_email_missing || is_linkedin_missing;\n\nreturn {\n  json: {\n    company_name: company.company_name,\n    company_url: company.company_url,\n    employee_count: company.employee_count,\n    industry: company.industry,\n    first_name: match.first_name || '',\n    last_name: match.last_name || '',\n    designation: match.title || '',\n    partial_email: email,\n    verified_email: email,\n    linkedin_url: linkedin,\n    apollo_person_id: match.id || '',\n    enrichment_status: 'verified',\n    enriched_at: today,\n    has_missing_data: has_missing_data,\n    is_email_missing: is_email_missing,\n    is_linkedin_missing: is_linkedin_missing,\n    is_last_item: $node[\"Split In Batches\"].context.noItemsLeft\n  }\n};"
+      },
+      "id": "64093aa8-bb2a-453f-bf55-3ec2a5ed7d0e",
+      "name": "Normalize Single Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        26432,
+        8560
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.has_missing_data}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "19560b07-f79a-4e3a-abaf-57dff365937e",
+      "name": "If Missing Data",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        26640,
+        8560
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.is_email_missing}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "cb6b75c4-9f92-4dc8-a035-788210756228",
+      "name": "If Needs MailMeteor",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        26832,
+        8416
+      ],
+      "notes": "We only call MailMeteor if Email is missing. If LinkedIn is missing, we skip them anyway so no point calling it."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://spoiler-boxing-doorframe.ngrok-free.dev/find-email",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"first_name\": \"{{ $('Normalize Single Data').item.json.first_name }}\",\n  \"last_name\": \"{{ $('Normalize Single Data').item.json.last_name }}\",\n  \"domain\": \"{{ $('Clean URL').item.json.clean_domain }}\",\n  \"linkedin_url\": \"{{ $('Normalize Single Data').item.json.linkedin_url }}\"\n}",
+        "options": {}
+      },
+      "id": "59b86847-ac5e-4dbc-805a-d9a8213835c3",
+      "name": "MailMeteor API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        27040,
+        8272
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const mmResponse = $input.item.json;\nconst personData = $('Normalize Single Data').item.json;\n\nlet finalData = { ...personData };\n\nif (mmResponse.success && mmResponse.email) {\n  finalData.verified_email = mmResponse.email;\n  finalData.enrichment_status = 'verified_via_' + mmResponse.source;\n  // Re-evaluate missing data now that we have an email.\n  // If linkedin was also missing, this will STILL be true, which is correct.\n  finalData.has_missing_data = (!finalData.verified_email || !finalData.linkedin_url);\n}\n\nreturn { json: finalData };"
+      },
+      "id": "b80e7009-2dbf-4920-aaaa-fb4d90815b5a",
+      "name": "Normalize MailMeteor Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        27232,
+        8272
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.has_missing_data}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "9d0b04d6-c03d-4838-a405-81d59f8b89ed",
+      "name": "If MailMeteor Missing Data",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        27440,
+        8272
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.is_last_item}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "402f6686-696a-4de9-aa4e-9ecea63c8fcd",
+      "name": "If Last Item",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        27632,
+        8416
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "mode": "id",
+          "value": "YOUR_OUTPUT_SPREADSHEET_ID"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "s2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_OUTPUT_SPREADSHEET_ID/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "company_name": "={{$json.company_name}}",
+            "company_url": "={{$json.company_url}}",
+            "employee_count": "={{$json.employee_count}}",
+            "industry": "={{$json.industry}}",
+            "first_name": "={{$json.first_name}}",
+            "last_name": "={{$json.last_name}}",
+            "designation": "={{$json.designation}}",
+            "partial_email": "={{$json.partial_email}}",
+            "verified_email": "={{$json.verified_email}}",
+            "linkedin_url": "={{$json.linkedin_url}}",
+            "apollo_person_id": "={{$json.apollo_person_id}}",
+            "enrichment_status": "={{$json.enrichment_status}}",
+            "enriched_at": "={{$json.enriched_at}}"
+          },
+          "matchingColumns": [
+            "company_name"
+          ],
+          "schema": [
+            {
+              "id": "company_name",
+              "displayName": "company_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "company_url",
+              "displayName": "company_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "employee_count",
+              "displayName": "employee_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "industry",
+              "displayName": "industry",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "first_name",
+              "displayName": "first_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "last_name",
+              "displayName": "last_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "designation",
+              "displayName": "designation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "verified_email",
+              "displayName": "verified_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "linkedin_url",
+              "displayName": "linkedin_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "apollo_person_id",
+              "displayName": "apollo_person_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "partial_email",
+              "displayName": "partial_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "enrichment_status",
+              "displayName": "enrichment_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "enriched_at",
+              "displayName": "enriched_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "e7ebb558-a6eb-4ad4-9e74-bca5c0706935",
+      "name": "Update Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        27840,
+        8608
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "KPzGgJdhqfoGcX8G",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "YOUR_SLACK_WEBHOOK_URL",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"text\": \"🚀 Single Lead Enriched ({{ $json.has_missing_data ? 'Partial Data - Last Option' : 'Complete Data' }})\\n\\nName: {{$json.first_name}} {{$json.last_name}}\\nCompany: {{$json.company_name}}\\nDesignation: {{$json.designation}}\\nEmail: {{$json.verified_email || 'Not Found'}}\\nLinkedIn: {{$json.linkedin_url || 'Not Found'}}\\nEnrichment Source: {{$json.enrichment_status}}\"\n}",
+        "options": {}
+      },
+      "id": "422f8e44-c490-46ce-bce3-f24f88288ec6",
+      "name": "Slack Notification (Success/Final)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        28032,
+        8608
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "start-enrichment",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, OPTIONS, GET"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        23968,
+        8416
+      ],
+      "id": "a8ba6fb2-2725-478e-9a93-1469b8491b98",
+      "name": "Webhook",
+      "webhookId": "e72380a1-a732-4323-8796-0ef57b8bb512"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Read Input Sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Output Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Input Sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter by Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter by Row": {
+      "main": [
+        [
+          {
+            "node": "Clean URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean URL": {
+      "main": [
+        [
+          {
+            "node": "Apollo Organization Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo Organization Search": {
+      "main": [
+        [
+          {
+            "node": "Apollo API Search High Value",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo API Search High Value": {
+      "main": [
+        [
+          {
+            "node": "If Zero Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Zero Results": {
+      "main": [
+        [
+          {
+            "node": "Merge Search Results",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Apollo API Search Fallback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo API Search Fallback": {
+      "main": [
+        [
+          {
+            "node": "Merge Search Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Search Results": {
+      "main": [
+        [
+          {
+            "node": "Filter Unique Titles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Unique Titles": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split In Batches": {
+      "main": [
+        [
+          {
+            "node": "Deduplication Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deduplication Check": {
+      "main": [
+        [
+          {
+            "node": "If Skip Silently",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Skip Silently": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Duplicate": {
+      "main": [
+        [
+          {
+            "node": "Slack Notification (Duplicate)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Apollo Single Enrich",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apollo Single Enrich": {
+      "main": [
+        [
+          {
+            "node": "Normalize Single Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Single Data": {
+      "main": [
+        [
+          {
+            "node": "If Missing Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Missing Data": {
+      "main": [
+        [
+          {
+            "node": "If Needs MailMeteor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Needs MailMeteor": {
+      "main": [
+        [
+          {
+            "node": "MailMeteor API",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Last Item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MailMeteor API": {
+      "main": [
+        [
+          {
+            "node": "Normalize MailMeteor Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize MailMeteor Data": {
+      "main": [
+        [
+          {
+            "node": "If MailMeteor Missing Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If MailMeteor Missing Data": {
+      "main": [
+        [
+          {
+            "node": "If Last Item",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Last Item": {
+      "main": [
+        [
+          {
+            "node": "Update Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Slack Notification (Success/Final)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Notification (Success/Final)": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Notification (Duplicate)": {
+      "main": [
+        [
+          {
+            "node": "Split In Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1
+  },
+  "versionId": "bf7633ed-cd26-4cb5-8836-d68cb93d320e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "581cc386adb3c63a358ac6654f7a77eae3572a40126b3df731395ba6e42d841c"
+  },
+  "id": "SSlFHUos0ZzWu789",
+  "tags": []
+}
