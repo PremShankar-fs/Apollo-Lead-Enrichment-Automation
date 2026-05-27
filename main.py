@@ -23,6 +23,11 @@ class EmailRequest(BaseModel):
 
 @app.post("/find-email")
 def find_email(data: EmailRequest):
+    print("==================================================")
+    print("NEW EMAIL REQUEST")
+    print(f"Person: {data.first_name} {data.last_name}")
+    print(f"Domain: {data.domain}")
+    print("==================================================\n")
 
     email = None
     source = None
@@ -34,12 +39,18 @@ def find_email(data: EmailRequest):
             browser = p.chromium.connect_over_cdp("http://localhost:9222")
             context = browser.contexts[0] if browser.contexts else browser.new_context()
             print("Connected to CDP Chrome session")
+            print("Browser ready\n")
         except Exception as e:
-            print("Could not connect to CDP, launching new browser:", e)
+
+            print("Launching headless browser...")
             browser = p.chromium.launch(
-                headless=False,
-                slow_mo=100,
-                args=["--start-maximized"]
+                headless=True,
+                args=[
+                    "--start-maximized",
+                    "--disable-blink-features=AutomationControlled",
+                    "--disable-dev-shm-usage",
+                    "--no-sandbox"
+                ]
             )
             context = browser.new_context(
                 viewport={"width": 1400, "height": 900},
@@ -50,6 +61,7 @@ def find_email(data: EmailRequest):
                 )
             )
             close_browser = True
+            print("Browser ready\n")
 
         # ==========================================
         # TRY 1 — LINKEDIN FINDER
@@ -57,7 +69,8 @@ def find_email(data: EmailRequest):
 
         if data.linkedin_url:
 
-            print("Trying LinkedIn finder...")
+            print("[LinkedIn Finder]")
+            print("Opening MailMeteor LinkedIn Finder...")
 
             email = try_linkedin_finder(
                 context,
@@ -73,7 +86,8 @@ def find_email(data: EmailRequest):
 
         if not email:
 
-            print("Trying name + domain finder...")
+            print("[Name+Domain Finder]")
+            print("Opening MailMeteor Name+Domain Finder...")
 
             email = try_name_domain_finder(
                 context,
@@ -91,6 +105,13 @@ def find_email(data: EmailRequest):
     # ==========================================
     # FINAL RESPONSE
     # ==========================================
+
+    if email:
+        print("FINAL RESULT -> SUCCESS")
+        print(f"Source: {source}")
+    else:
+        print("FINAL RESULT -> FAILED")
+    print("==================================================")
 
     if email:
         return {
@@ -142,6 +163,7 @@ def try_linkedin_finder(context, linkedin_url):
 
         # Human typing
         input_box.type(linkedin_url, delay=80)
+        print("LinkedIn URL entered")
 
         page.wait_for_timeout(1500)
 
@@ -151,13 +173,15 @@ def try_linkedin_finder(context, linkedin_url):
         ).first
 
         button.click()
+        print("Search submitted")
+        print("Scanning page for emails...")
 
-        page.wait_for_timeout(8000)
+        page.wait_for_timeout(15000)
 
         text_content = page.locator("body").inner_text()
 
         if "No results found" in text_content:
-            print("LinkedIn finder: No results found")
+            print("No results found\n")
             page.close()
             return None
 
@@ -172,7 +196,7 @@ def try_linkedin_finder(context, linkedin_url):
 
             found_email = valid_emails[0]
 
-            print("LinkedIn finder success:", found_email)
+            print(f"Email found: {found_email}\n")
 
             page.close()
 
@@ -184,7 +208,7 @@ def try_linkedin_finder(context, linkedin_url):
 
     except Exception as e:
 
-        print("LinkedIn finder error:", e)
+        print(f"LinkedIn finder error: {e}\n")
 
         page.close()
 
@@ -231,6 +255,7 @@ def try_name_domain_finder(
         page.wait_for_timeout(500)
 
         name_input.type(full_name, delay=80)
+        print("Name entered")
 
         # ======================================
         # DOMAIN FIELD
@@ -247,6 +272,7 @@ def try_name_domain_finder(
         page.wait_for_timeout(500)
 
         domain_input.type(domain, delay=80)
+        print("Domain entered")
 
         page.wait_for_timeout(1500)
 
@@ -259,13 +285,15 @@ def try_name_domain_finder(
         ).first
 
         button.click()
+        print("Search submitted")
+        print("Scanning page for emails...")
 
-        page.wait_for_timeout(8000)
+        page.wait_for_timeout(15000)
 
         text_content = page.locator("body").inner_text()
 
         if "No results found" in text_content:
-            print("Name+Domain finder: No results found")
+            print("No results found\n")
             page.close()
             return None
 
@@ -280,7 +308,7 @@ def try_name_domain_finder(
 
             found_email = valid_emails[0]
 
-            print("Name+Domain success:", found_email)
+            print(f"Email found: {found_email}\n")
 
             page.close()
 
@@ -292,7 +320,7 @@ def try_name_domain_finder(
 
     except Exception as e:
 
-        print("Name+domain finder error:", e)
+        print(f"Name+domain finder error: {e}\n")
 
         page.close()
 
