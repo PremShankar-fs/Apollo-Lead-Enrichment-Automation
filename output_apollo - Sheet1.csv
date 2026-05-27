@@ -1,1 +1,6 @@
-company_name,company_url,employee_count,industry,first_name,last_name,designation,work_email,linkedin_url
+company_name,company_url,employee_count,industry,first_name,last_name,designation,verified_email,linkedin_url,apollo_person_id,partial_email,enrichment_status,enriched_at
+Infosys,http://www.infosys.com,300000,information technology & services,Christian,Rodriguez Peredo,Chief Technology Officer,christian.rodriguez@infosys.com,http://www.linkedin.com/in/chrisroperdev,5e86a8285a4fc7000193da1a,christian.rodriguez@infosys.com,verified,2026-05-27
+Accenture,http://www.accenture.com,801000,management consulting,Luca,Birenghi,CTO,luca@accenture.com,http://www.linkedin.com/in/luca-birenghi-b7466b23b,66f59608b6a26900013ac1dd,,verified_via_linkedin,2026-05-27
+Google,http://www.google.com,188000,information technology & services,Christoph,Tavan,"Engineering Manager, Founder, CTO",christoph@contentpass.de,http://www.linkedin.com/in/christophtavan,65588fcd17bff800010e167b,,verified_via_linkedin,2026-05-27
+Fleet Studio,http://www.fleetstudio.com,75,information technology & services,Ashish,Sharma,Software Engineer,aranjeet@fleetstudio.com,http://www.linkedin.com/in/ashish-sharma-aa39711b4,61217f4da22c81000170b570,aranjeet@fleetstudio.com,verified,2026-05-27
+Microsoft,http://www.microsoft.com,228000,information technology & services,Adil-Ul,Islam,Co-Founder & CTO,a-aislam@microsoft.com,http://www.linkedin.com/in/adil-ulislam,5e880bf501721400014e2afc,a-aislam@microsoft.com,verified,2026-05-27
